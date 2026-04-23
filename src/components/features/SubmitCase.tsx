@@ -26,6 +26,7 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
   
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [photo, setPhoto] = useState<string | null>(null);
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -83,6 +84,7 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
   const startVoice = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) return;
+    setErrors(prev => ({ ...prev, symptoms: '' }));
     const recognition = new SpeechRecognition();
     recognition.lang = language === 'fr' ? 'fr-FR' : 'en-US';
     recognition.onstart = () => setIsListening(true);
@@ -105,6 +107,30 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
       }
     };
     recognition.start();
+  };
+
+  const validateStep1 = () => {
+    let newErrors: { [key: string]: string } = {};
+    if (!formData.village.trim()) newErrors.village = language === 'fr' ? 'Le village est requis' : 'Village is required';
+    
+    const ageNum = parseInt(formData.age);
+    if (!formData.age) {
+      newErrors.age = language === 'fr' ? 'L\'âge est requis' : 'Age is required';
+    } else if (isNaN(ageNum) || ageNum < 0 || ageNum > 240) {
+      newErrors.age = language === 'fr' ? 'Âge invalide (0-240 mois)' : 'Invalid age (0-240 months)';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    let newErrors: { [key: string]: string } = {};
+    if (formData.symptoms.length === 0 && !formData.history.trim()) {
+      newErrors.symptoms = language === 'fr' ? 'Sélectionnez au moins un symptôme ou ajoutez un historique' : 'Select at least one symptom or add patient history';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const analyze = async () => {
@@ -180,8 +206,14 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
             <Card title={t.new_case} subtitle={t.district_node} icon={MapPin}>
                <div className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <Input label="Village" value={formData.village} onChange={v => setFormData(p=>({...p, village: v}))} placeholder="ex: Kanyama" />
-                   <Input label={language === 'fr' ? "Âge (mois)" : "Age (months)"} type="number" value={formData.age} onChange={v => setFormData(p=>({...p, age: v}))} placeholder="0-60" />
+                   <div className="space-y-1">
+                     <Input label="Village" value={formData.village} onChange={v => { setFormData(p=>({...p, village: v})); setErrors(p=>({...p, village: ''})); }} placeholder="ex: Kanyama" />
+                     {errors.village && <p className="text-[10px] font-bold text-red-500 uppercase tracking-tight">{errors.village}</p>}
+                   </div>
+                   <div className="space-y-1">
+                     <Input label={language === 'fr' ? "Âge (mois)" : "Age (months)"} type="number" value={formData.age} onChange={v => { setFormData(p=>({...p, age: v})); setErrors(p=>({...p, age: ''})); }} placeholder="0-60" />
+                     {errors.age && <p className="text-[10px] font-bold text-red-500 uppercase tracking-tight">{errors.age}</p>}
+                   </div>
                  </div>
                  
                  <div className={`p-4 rounded-xl border flex items-center justify-between transition-colors ${location ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}`}>
@@ -199,7 +231,7 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
                     {location && <ShieldCheck className="text-emerald-500" size={16} />}
                  </div>
 
-                 <Button onClick={() => setStep(2)} disabled={!formData.village || !formData.age} className="w-full mt-4" icon={ChevronRight}>{language === 'fr' ? 'Suivant : Symptômes' : 'Next: Symptoms'}</Button>
+                 <Button onClick={() => validateStep1() && setStep(2)} className="w-full mt-4" icon={ChevronRight}>{language === 'fr' ? 'Suivant : Symptômes' : 'Next: Symptoms'}</Button>
                </div>
             </Card>
           </motion.div>
@@ -209,20 +241,23 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
           <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <Card title={language === 'fr' ? 'Constats Cliniques' : 'Clinical Findings'} subtitle={language === 'fr' ? 'Observation' : 'Observation'} icon={Stethoscope}>
               <div className="space-y-6">
-                <div className="flex flex-wrap gap-2">
-                  {symptomList.map(s => (
-                    <button 
-                      key={s} 
-                      onClick={() => toggleSymptom(s)}
-                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                        formData.symptoms.includes(s) 
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-105' 
-                        : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    {symptomList.map(s => (
+                      <button 
+                        key={s} 
+                        onClick={() => { toggleSymptom(s); setErrors(p=>({...p, symptoms: ''})); }}
+                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                          formData.symptoms.includes(s) 
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-105' 
+                          : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.symptoms && <p className="text-[10px] font-bold text-red-500 uppercase tracking-tight">{errors.symptoms}</p>}
                 </div>
 
                 <div className="flex items-center gap-4 py-4 border-y border-slate-100">
@@ -236,7 +271,7 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
                   <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider font-mono">Patient History / Clinical Context</label>
                   <textarea 
                     value={formData.history}
-                    onChange={e => setFormData(p=>({...p, history: e.target.value}))}
+                    onChange={e => { setFormData(p=>({...p, history: e.target.value})); setErrors(p=>({...p, symptoms: ''})); }}
                     className="w-full border border-slate-200 rounded-xl px-4 py-3 min-h-[100px] text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                     placeholder="Capture additional context here..."
                   />
@@ -248,7 +283,7 @@ export const SubmitCase = ({ profile, language }: SubmitCaseProps) => {
                 </label>
                 <div className="flex gap-4 pt-2">
                   <Button variant="secondary" onClick={() => setStep(1)} className="flex-1">{language === 'fr' ? 'Retour' : 'Back'}</Button>
-                  <Button onClick={() => { setStep(3); startCamera(); }} className="flex-1" icon={ChevronRight}>{language === 'fr' ? 'Suivant : Photo' : 'Next: Photo'}</Button>
+                  <Button onClick={() => { if(validateStep2()) { setStep(3); startCamera(); } }} className="flex-1" icon={ChevronRight}>{language === 'fr' ? 'Suivant : Photo' : 'Next: Photo'}</Button>
                 </div>
               </div>
             </Card>
