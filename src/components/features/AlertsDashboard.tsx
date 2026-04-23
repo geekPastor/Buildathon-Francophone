@@ -4,8 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { ShieldCheck, LogOut, LayoutDashboard, ChevronRight, MapPin, AlertCircle, TrendingUp, Package, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ShieldCheck, LogOut, LayoutDashboard, ChevronRight, MapPin, AlertCircle, TrendingUp, Package, Zap, X, CheckCircle, AlertTriangle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -161,6 +161,102 @@ export const AlertsDashboard = ({ profile, language }: AlertsDashboardProps) => 
            </div>
          ))}
       </div>
+
+      <AnimatePresence>
+        {showFeedback && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={() => setShowFeedback(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-4xl bg-white rounded-[32px] shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[80vh]"
+            >
+               <div className="p-8 bg-slate-900 text-white flex justify-between items-center">
+                  <div>
+                    <h2 className="text-2xl font-black tracking-tight">{language === 'fr' ? "Analyse de Performance IA" : "AI Performance Analysis"}</h2>
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-1">Nœud de District • Apprentissage Continu</p>
+                  </div>
+                  <button onClick={() => setShowFeedback(false)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+                    <X size={24} />
+                  </button>
+               </div>
+
+               <div className="flex-1 overflow-y-auto p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Précision Moyenne</p>
+                       <p className="text-3xl font-black text-slate-900">94.2%</p>
+                       <div className="mt-2 text-[10px] font-bold text-emerald-500 uppercase">+1.2% ce mois</div>
+                    </div>
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Faux Positifs</p>
+                       <p className="text-3xl font-black text-slate-900">3.1%</p>
+                       <div className="mt-2 text-[10px] font-bold text-blue-500 uppercase">Seuil optimal</div>
+                    </div>
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Cas Validés</p>
+                       <p className="text-3xl font-black text-slate-900">1,240</p>
+                       <div className="mt-2 text-[10px] font-bold text-slate-400 uppercase">Derniers 90 jours</div>
+                    </div>
+                  </div>
+
+                  <h3 className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-6 border-b border-slate-100 pb-2">Vérifications Humaines Requises</h3>
+                  
+                  <div className="space-y-4">
+                    {[
+                      { id: 1, disease: 'Malaria Probable', confidence: '89%', date: '2h ago', status: 'pending' },
+                      { id: 2, disease: 'Pneumonie Suspectée', confidence: '92%', date: '5h ago', status: 'pending' },
+                      { id: 3, disease: 'Malnutrition SAM', confidence: '96%', date: 'Yesterday', status: 'pending' }
+                    ].map(item => (
+                      <div key={item.id} className="p-6 bg-white border border-slate-100 rounded-2xl flex items-center justify-between hover:border-blue-200 transition-all shadow-sm">
+                        <div className="flex items-center gap-4">
+                           <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                              <Zap size={20} />
+                           </div>
+                           <div>
+                              <p className="text-sm font-bold text-slate-900">{item.disease}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase">{item.date} • Confiance IA: {item.confidence}</p>
+                           </div>
+                        </div>
+                        <div className="flex gap-2">
+                           <Button variant="outline" className="!py-2 !px-4 !text-[10px] gap-2 hover:!bg-emerald-50 hover:!text-emerald-600 hover:!border-emerald-200">
+                              <ThumbsUp size={14} /> {language === 'fr' ? 'Valider' : 'Validate'}
+                           </Button>
+                           <Button variant="outline" className="!py-2 !px-4 !text-[10px] gap-2 hover:!bg-red-50 hover:!text-red-600 hover:!border-red-200">
+                              <ThumbsDown size={14} /> {language === 'fr' ? 'Rejeter' : 'Reject'}
+                           </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-10 p-6 bg-blue-50 rounded-2xl border border-blue-100 flex items-start gap-4">
+                     <AlertTriangle className="text-blue-500 shrink-0" size={20} />
+                     <div>
+                        <p className="text-sm font-bold text-blue-900 mb-1">{language === 'fr' ? "Amélioration Continue" : "Continuous Improvement"}</p>
+                        <p className="text-xs text-blue-700 leading-relaxed">
+                          {language === 'fr' 
+                            ? "Chaque validation humaine permet de ré-entraîner les modèles de district pour réduire les erreurs de diagnostic dans les zones à faible connectivité."
+                            : "Each human validation allows for the retraining of district models to reduce diagnostic errors in areas with low connectivity."}
+                        </p>
+                     </div>
+                  </div>
+               </div>
+               
+               <div className="p-8 border-t border-slate-100 bg-slate-50 flex justify-end">
+                  <Button onClick={() => setShowFeedback(false)}>{language === 'fr' ? 'Fermer' : 'Close'}</Button>
+               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
