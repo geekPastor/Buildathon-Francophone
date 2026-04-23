@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "System users (Community Health Workers or Health Authorities)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["CHW", "AUTHORITY"] },
+        "district": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "PatientCase": {
+      "title": "Patient Case",
+      "description": "Medical record for a single child visit",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "patientAgeMonths": { "type": "integer" },
+        "symptoms": { "type": "array", "items": { "type": "string" } },
+        "hasFever": { "type": "boolean" },
+        "history": { "type": "string" },
+        "diagnosis": { "type": "string" },
+        "probability": { "type": "number" },
+        "reasoning": { "type": "string" },
+        "riskLevel": { "type": "string", "enum": ["LOW", "MODERATE", "CRITICAL"] },
+        "priorityScore": { "type": "number" },
+        "malnutritionStatus": { "type": "string" },
+        "muacMeasurement": { "type": "number" },
+        "photoUrl": { "type": "string" },
+        "chwId": { "type": "string" },
+        "district": { "type": "string" },
+        "village": { "type": "string" },
+        "isAlert": { "type": "boolean" },
+        "hospitalConfirmedDiagnosis": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["patientAgeMonths", "chwId", "district", "village"]
+    },
+    "PatientRecord": {
+      "title": "Patient Profile",
+      "description": "Longitudinal record for a student/child",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "village": { "type": "string" },
+        "district": { "type": "string" },
+        "lastVisit": { "type": "string", "format": "date-time" },
+        "riskHistory": { "type": "array" }
+      }
+    },
+    "MedicalStock": {
+      "title": "Medical Stock",
+      "description": "Inventory tracking for essential medicines",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "district": { "type": "string" },
+        "itemName": { "type": "string" },
+        "currentStock": { "type": "integer" },
+        "unit": { "type": "string" },
+        "threshold": { "type": "integer" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AIFeedbackLoop": {
+      "title": "AI Feedback",
+      "description": "Comparison between AI diagnosis and clinical reality",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "caseId": { "type": "string" },
+        "aiDiagnosis": { "type": "string" },
+        "hospitalDiagnosis": { "type": "string" },
+        "isCorrect": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "EpidemicAlert": {
+      "title": "Epidemic Alert",
+      "description": "Aggregated data alert for a potential outbreak",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "district": { "type": "string" },
+        "condition": { "type": "string" },
+        "caseCount": { "type": "integer" },
+        "severity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "status": { "type": "string", "enum": ["NEW", "INVESTIGATING", "RESOLVED"] },
+        "predictedCases7d": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["district", "condition", "caseCount"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profile records"
+    },
+    "/cases/{caseId}": {
+      "schema": "PatientCase",
+      "description": "Patient medical cases"
+    },
+    "/patients/{patientId}": {
+      "schema": "PatientRecord",
+      "description": "Longitudinal patient profiles"
+    },
+    "/stock/{stockId}": {
+      "schema": "MedicalStock",
+      "description": "Medical inventory levels"
+    },
+    "/feedback/{feedbackId}": {
+      "schema": "AIFeedbackLoop",
+      "description": "AI model improvement data"
+    },
+    "/alerts/{alertId}": {
+      "schema": "EpidemicAlert",
+      "description": "System-wide health alerts"
+    }
+  }
+}

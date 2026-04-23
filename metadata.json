@@ -1,0 +1,14 @@
+{
+  "name": "AfyaChain: Rural Health AI",
+  "description": "An AI-powered public health platform for diagnosis assistance, malnutrition detection, and outbreak monitoring in rural Africa.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "AI Diagnosis Assistance",
+    "CV-based Malnutrition Detection",
+    "Real-time Epidemic Alerts"
+  ]
+}
