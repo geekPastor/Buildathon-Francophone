@@ -251,7 +251,10 @@ export const LandingPage = ({ onLogin, language, setLanguage }: LandingPageProps
                 <div className="w-6 h-6 bg-slate-900 rounded flex items-center justify-center text-white font-bold text-xs text-center">A</div>
                 <span className="font-black tracking-tighter text-lg leading-none">AfyaChain.</span>
               </div>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">© 2026 Resilience AI Labs. All rights reserved.</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                © 2026 Geek Pastor. All rights reserved.<br/>
+                Développé dans le cadre du Buildathon Francophone.
+              </p>
            </div>
            <div className="flex gap-10 text-[10px] font-bold uppercase tracking-widest text-slate-400">
               <a href="#" className="hover:text-slate-900 transition-colors">Privacy</a>

@@ -152,7 +152,10 @@ const App = () => {
                  <span className="flex items-center gap-2"><MapPin size={12} /> {t.cloud_sync_active}</span>
                  <span className="flex items-center gap-2"><MapPin size={12} /> {t.gemini_enabled}</span>
               </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.privacy_protocol}</p>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.privacy_protocol}</p>
+                <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-1">By Geek Pastor • Buildathon Francophone</p>
+              </div>
            </div>
         </footer>
       </main>

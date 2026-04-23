@@ -79,4 +79,4 @@ src/
 AfyaChain is released under the **Apache-2.0 License**.
 
 ---
-*Built with ❤️ for resilient health systems by Resilience AI Labs.*
+*Built with ❤️ by **Geek Pastor** dans le cadre du **Buildathon Francophone**.*
